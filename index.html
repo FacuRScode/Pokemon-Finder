@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Pokedex</h1>
+        <input type="text" id="search-input" id="search-input" placeholder="Buscar Pokémon..." oninput="searchPokemon()">
+        <button id="button-favorites" onclick="showFavorites()">Ver Favoritos</button>
+    </header>
+    
+    <section id="pokemon-list" class="pokemon-list">
+        <!-- Los Pokémon se cargarán aquí -->
+    </section>
+    
+    <div id="pagination-controls">
+        <button id="prev-button" onclick="changePage(-1)">Anterior</button>
+        <button id="next-button" onclick="changePage(1)">Siguiente</button>
+        <button id="index-button" onclick="changePage(0)" >Volver al inicio</button>
+    </div>
+
+    <!-- Modal para mostrar detalles del Pokémon -->
+    <div id="pokemon-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">×</span>
+            <h2 id="pokemon-name"></h2>
+            <img id="pokemon-image" alt="Pokemon Image">
+            <p><strong>Altura:</strong> <span id="pokemon-height"></span> m</p>
+            <p><strong>Peso:</strong> <span id="pokemon-weight"></span> kg</p>
+            <p><strong>Habilidades:</strong> <span id="pokemon-abilities"></span></p>
+            <button id="closeModal" onclick="closeModal()">Cerrar</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

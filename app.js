@@ -423,6 +423,9 @@ window.addEventListener('DOMContentLoaded', () => {
     renderRecentSearches();
     renderNPokemon(PAGE_SIZE, 0);
     // Eventos de paginación
+    document.getElementById('firstPage').onclick = () => {
+        renderNPokemon(PAGE_SIZE, 0);
+    };
     document.getElementById('prevPage').onclick = () => {
         if (currentOffset >= PAGE_SIZE) {
             renderNPokemon(PAGE_SIZE, currentOffset - PAGE_SIZE);
@@ -431,6 +434,18 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('nextPage').onclick = () => {
         renderNPokemon(PAGE_SIZE, currentOffset + PAGE_SIZE);
     };
+    document.getElementById('lastPage').onclick = () => {
+        fetchPokemonList(0, PAGE_SIZE).then(data => {
+            const totalPages = Math.ceil(data.count / PAGE_SIZE);
+            renderNPokemon(PAGE_SIZE, (totalPages - 1) * PAGE_SIZE);
+        });
+    };
+    // Activar paginación con Enter en el input
+    document.getElementById('pageSelector').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('goToPage').click();
+        }
+    });
     // Evento para quitar todos los favoritos
     document.getElementById('clearFavoritesBtn').onclick = () => {
         // Borrar todos los datos de los Pokémon favoritos

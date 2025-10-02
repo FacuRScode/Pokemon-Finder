@@ -34,54 +34,13 @@ function renderRecentSearches() {
 // Renderiza uno o varios Pokémon en el contenedor indicado
 function renderPokemonCard(data, container = null) {
     const pokemons = Array.isArray(data) ? data : [data];
-    const cards = pokemons.map(poke => {
-        const mainType = poke.types[0].type.name;
-        const isFav = isFavorite(poke.id);
-        const star = isFav ? '★' : '☆';
-        return `
-        <div class="pokemon-card type-${mainType}" style="cursor:pointer;position:relative;" data-id="${poke.id}">
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${poke.id}.png" alt="${poke.name}">
-            <button class="fav-btn" data-id="${poke.id}" style="margin-bottom:8px;padding:4px 10px;background:#ffe259;color:#333;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;">${star} Favorito</button>
-            <h2 style="margin-top:8px;">${poke.name.charAt(0).toUpperCase() + poke.name.slice(1)} (#${poke.id})</h2>
-            <p><strong>Tipo:</strong> ${poke.types.map(t => t.type.name).join(', ')}</p>
-        </div>
-        `;
-    }).join('');
     const target = container || document.getElementById('pokemonInfo');
-    target.innerHTML = cards;
-    // Evento para agregar/quitar favoritos
-    Array.from(target.getElementsByClassName('fav-btn')).forEach(btn => {
-        btn.onclick = (e) => {
-            e.stopPropagation();
-            const pokeId = btn.getAttribute('data-id');
-            const poke = pokemons.find(p => p.id == pokeId);
-            if (!isFavorite(poke.id)) {
-                if (!addFavorite(poke)) {
-                    btn.textContent = 'Límite 50';
-                    btn.style.background = '#ffbaba';
-                    setTimeout(() => {
-                        btn.textContent = '☆ Favorito';
-                        btn.style.background = '#ffe259';
-                    }, 1200);
-                    return;
-                }
-                btn.textContent = '★ Favorito';
-                btn.style.background = '#ffd700';
-            } else {
-                removeFavorite(poke);
-                btn.textContent = '☆ Favorito';
-                btn.style.background = '#ffe259';
-            }
-        };
+    target.innerHTML = '';
+    pokemons.forEach(poke => {
+        const card = createPokemonCardElement(poke);
+        target.appendChild(card);
     });
-    // Si es solo uno, agregar modal y eventos
-    if (pokemons.length === 1) {
-        const poke = pokemons[0];
-        const card = target.querySelector('.pokemon-card');
-        card.onclick = () => {
-            showPokemonModal(poke, target);
-        };
-    }
+    // Si es solo uno, agregar modal y eventos (ya está en la card)
 }
 
 // Mostrar el primer Pokémon al cargar la página
@@ -278,15 +237,10 @@ async function renderNPokemon(n = PAGE_SIZE, offset = 0) {
             console.warn('Error al renderizar:', p.name, err);
         }
     }
-    // Renderizar todas las cards juntas
-    renderPokemonCard(pokeDatas, container);
-    // Agregar evento a cada card para mostrar la modal sin borrar la lista
-    Array.from(container.getElementsByClassName('pokemon-card')).forEach(card => {
-        card.onclick = async () => {
-            const pokeId = card.getAttribute('data-id');
-            const pokeData = pokeDatas.find(p => p.id == pokeId);
-            showPokemonModal(pokeData, container);
-        };
+    // Renderizar todas las cards juntas usando createPokemonCardElement
+    pokeDatas.forEach(poke => {
+        const card = createPokemonCardElement(poke);
+        container.appendChild(card);
     });
     // Actualizar paginación
     updatePagination(data.count);
@@ -460,24 +414,65 @@ function removeFavorite(poke) {
 // Renderiza todos los Pokémon favoritos desde localStorage
 function renderFavoritePokemons() {
     const favs = getFavorites();
+    const container = document.getElementById('pokemonInfo');
     if (!favs.length) {
-        document.getElementById('pokemonInfo').innerHTML = '<p>No tienes favoritos aún.</p>';
+        container.innerHTML = '<p>No tienes favoritos aún.</p>';
         return;
     }
     Promise.all(
         favs.map(f => fetchPokemon(f.id))
     ).then(pokeDatas => {
-        renderPokemonCard(pokeDatas, document.getElementById('pokemonInfo'));
-        // Agregar evento a cada card para mostrar la modal
-        const container = document.getElementById('pokemonInfo');
-        Array.from(container.getElementsByClassName('pokemon-card')).forEach(card => {
-            card.onclick = async () => {
-                const pokeId = card.getAttribute('data-id');
-                const pokeData = pokeDatas.find(p => p.id == pokeId);
-                showPokemonModal(pokeData, container);
-            };
+        container.innerHTML = '';
+        pokeDatas.forEach(poke => {
+            const card = createPokemonCardElement(poke);
+            container.appendChild(card);
         });
     }).catch(() => {
-        document.getElementById('pokemonInfo').innerHTML = '<p>Error al cargar favoritos.</p>';
+        container.innerHTML = '<p>Error al cargar favoritos.</p>';
     });
+}
+
+function createPokemonCardElement(poke) {
+    const mainType = poke.types[0].type.name;
+    const isFav = isFavorite(poke.id);
+    const star = isFav ? '★' : '☆';
+    const card = document.createElement('div');
+    card.className = `pokemon-card type-${mainType}`;
+    card.style.cursor = 'pointer';
+    card.style.position = 'relative';
+    card.setAttribute('data-id', poke.id);
+    card.innerHTML = `
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${poke.id}.png" alt="${poke.name}">
+        <button class="fav-btn" data-id="${poke.id}" style="margin-bottom:8px;padding:4px 10px;background:#ffe259;color:#333;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;">${star} Favorito</button>
+        <h2 style="margin-top:8px;">${poke.name.charAt(0).toUpperCase() + poke.name.slice(1)} (#${poke.id})</h2>
+        <p><strong>Tipo:</strong> ${poke.types.map(t => t.type.name).join(', ')}</p>
+    `;
+    // Evento para mostrar modal
+    card.onclick = (e) => {
+        if (e.target.classList.contains('fav-btn')) return;
+        showPokemonModal(poke, card.parentElement);
+    };
+    // Evento para agregar/quitar favorito
+    const favBtn = card.querySelector('.fav-btn');
+    favBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (!isFavorite(poke.id)) {
+            if (!addFavorite(poke)) {
+                favBtn.textContent = 'Límite 50';
+                favBtn.style.background = '#ffbaba';
+                setTimeout(() => {
+                    favBtn.textContent = '☆ Favorito';
+                    favBtn.style.background = '#ffe259';
+                }, 1200);
+                return;
+            }
+            favBtn.textContent = '★ Favorito';
+            favBtn.style.background = '#ffd700';
+        } else {
+            removeFavorite(poke);
+            favBtn.textContent = '☆ Favorito';
+            favBtn.style.background = '#ffe259';
+        }
+    };
+    return card;
 }

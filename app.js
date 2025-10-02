@@ -237,11 +237,12 @@ async function renderNPokemon(n = PAGE_SIZE, offset = 0) {
             console.warn('Error al renderizar:', p.name, err);
         }
     }
-    // Renderizar todas las cards juntas usando createPokemonCardElement
-    pokeDatas.forEach(poke => {
-        const card = createPokemonCardElement(poke);
-        container.appendChild(card);
-    });
+    // Renderizar todas las cards juntas
+    renderPokemonCard(pokeDatas, container);
+    // Precargar anterior y siguiente página en localStorage
+    if (typeof preloadAdjacentPages === 'function') {
+        preloadAdjacentPages(offset, n, data.count);
+    }
     // Actualizar paginación
     updatePagination(data.count);
 }
@@ -483,4 +484,16 @@ function createPokemonCardElement(poke) {
         }
     };
     return card;
+}
+
+// Precarga la página anterior y siguiente en el localStorage para mejorar la experiencia
+function preloadAdjacentPages(currentOffset, pageSize, totalCount) {
+    const prevOffset = currentOffset - pageSize;
+    const nextOffset = currentOffset + pageSize;
+    if (prevOffset >= 0 && !localStorage.getItem(`pokeapi:list:${prevOffset}:${pageSize}`)) {
+        fetchPokemonList(prevOffset, pageSize).catch(() => {});
+    }
+    if (nextOffset < totalCount && !localStorage.getItem(`pokeapi:list:${nextOffset}:${pageSize}`)) {
+        fetchPokemonList(nextOffset, pageSize).catch(() => {});
+    }
 }

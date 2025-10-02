@@ -44,7 +44,30 @@ function renderPokemonCard(data, container = null) {
 }
 
 // Mostrar el primer Pokémon al cargar la página
+
+// --- Modo oscuro accesible ---
+function setDarkMode(enabled) {
+    if (enabled) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('pokeapi:darkmode', '1');
+        document.getElementById('darkModeBtn').textContent = '☀️ Modo claro';
+        document.getElementById('darkModeBtn').setAttribute('aria-label', 'Alternar modo claro');
+    } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('pokeapi:darkmode', '0');
+        document.getElementById('darkModeBtn').textContent = '🌙 Modo oscuro';
+        document.getElementById('darkModeBtn').setAttribute('aria-label', 'Alternar modo oscuro');
+    }
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
+    // Dark mode setup
+    const darkBtn = document.getElementById('darkModeBtn');
+    const darkPref = localStorage.getItem('pokeapi:darkmode') === '1';
+    setDarkMode(darkPref);
+    darkBtn.onclick = () => {
+        setDarkMode(!document.body.classList.contains('dark-mode'));
+    };
     try {
         const data = await fetchPokemon(1); // Bulbasaur
         renderPokemonCard(data);

@@ -33,16 +33,10 @@ function renderRecentSearches() {
 // Renderiza la ficha de un Pokémon en el div pokemonInfo
 // Renderiza uno o varios Pokémon en el contenedor indicado
 function renderPokemonCard(data, container = null) {
-    // data puede ser un objeto o un array de objetos
     const pokemons = Array.isArray(data) ? data : [data];
-    // Obtener favoritos actuales
-    let favs = [];
-    try {
-        favs = JSON.parse(localStorage.getItem('pokeapi:favorites') || '[]');
-    } catch {}
     const cards = pokemons.map(poke => {
         const mainType = poke.types[0].type.name;
-        const isFav = favs.some(f => f.id == poke.id);
+        const isFav = isFavorite(poke.id);
         const star = isFav ? '★' : '☆';
         return `
         <div class="pokemon-card type-${mainType}" style="cursor:pointer;position:relative;" data-id="${poke.id}">
@@ -55,16 +49,14 @@ function renderPokemonCard(data, container = null) {
     }).join('');
     const target = container || document.getElementById('pokemonInfo');
     target.innerHTML = cards;
-    // Evento para agregar a favoritos
+    // Evento para agregar/quitar favoritos
     Array.from(target.getElementsByClassName('fav-btn')).forEach(btn => {
         btn.onclick = (e) => {
             e.stopPropagation();
             const pokeId = btn.getAttribute('data-id');
             const poke = pokemons.find(p => p.id == pokeId);
-            let favs = JSON.parse(localStorage.getItem('pokeapi:favorites') || '[]');
-            const isFav = favs.some(f => f.id == poke.id);
-            if (!isFav) {
-                if (favs.length >= 50) {
+            if (!isFavorite(poke.id)) {
+                if (!addFavorite(poke)) {
                     btn.textContent = 'Límite 50';
                     btn.style.background = '#ffbaba';
                     setTimeout(() => {
@@ -73,23 +65,12 @@ function renderPokemonCard(data, container = null) {
                     }, 1200);
                     return;
                 }
-                favs.unshift({ id: poke.id, name: poke.name });
-                localStorage.setItem('pokeapi:favorites', JSON.stringify(favs));
                 btn.textContent = '★ Favorito';
                 btn.style.background = '#ffd700';
-                setTimeout(() => {
-                    btn.textContent = '★ Favorito';
-                    btn.style.background = '#ffe259';
-                }, 1200);
             } else {
-                // Si ya está, quitar de favoritos y borrar datos
-                favs = favs.filter(f => f.id != poke.id);
-                localStorage.setItem('pokeapi:favorites', JSON.stringify(favs));
+                removeFavorite(poke);
                 btn.textContent = '☆ Favorito';
                 btn.style.background = '#ffe259';
-                // Borrar datos del Pokémon del localStorage
-                localStorage.removeItem(`pokeapi:pokemon:${poke.id}`);
-                localStorage.removeItem(`pokeapi:pokemon:${poke.name}`);
             }
         };
     });
@@ -342,11 +323,7 @@ function showPokemonModal(poke, container) {
     const oldModal = container.querySelector('#pokeModal');
     if (oldModal) oldModal.remove();
     const mainType = poke.types[0].type.name;
-    let favs = [];
-    try {
-        favs = JSON.parse(localStorage.getItem('pokeapi:favorites') || '[]');
-    } catch {}
-    const isFav = favs.some(f => f.id == poke.id);
+    const isFav = isFavorite(poke.id);
     const star = isFav ? '★' : '☆';
     const modal = document.createElement('div');
     modal.id = 'pokeModal';
@@ -383,37 +360,24 @@ function showPokemonModal(poke, container) {
     // Evento favorito en modal
     const favBtn = modal.querySelector('#favModalBtn');
     favBtn.onclick = () => {
-        let favs = JSON.parse(localStorage.getItem('pokeapi:favorites') || '[]');
-        const isFav = favs.some(f => f.id == poke.id);
-        if (!isFav) {
-            if (favs.length >= 50) {
+        if (!isFavorite(poke.id)) {
+            if (!addFavorite(poke)) {
                 favBtn.textContent = 'Límite 50';
                 favBtn.style.background = '#ffbaba';
-                setTimeout(() => {
-                    favBtn.textContent = '☆ Favorito';
-                    favBtn.style.background = '#ffe259';
-                }, 1200);
                 return;
             }
-            favs.unshift({ id: poke.id, name: poke.name });
-            localStorage.setItem('pokeapi:favorites', JSON.stringify(favs));
             favBtn.textContent = '★ Favorito';
             favBtn.style.background = '#ffd700';
         } else {
-            favs = favs.filter(f => f.id != poke.id);
-            localStorage.setItem('pokeapi:favorites', JSON.stringify(favs));
+            removeFavorite(poke);
             favBtn.textContent = '☆ Favorito';
             favBtn.style.background = '#ffe259';
-            // Borrar datos del Pokémon del localStorage
-            localStorage.removeItem(`pokeapi:pokemon:${poke.id}`);
-            localStorage.removeItem(`pokeapi:pokemon:${poke.name}`);
         }
         // Actualizar el botón de favorito en la card de la lista
         const cardBtn = document.querySelector(`.pokemon-card[data-id='${poke.id}'] .fav-btn`);
         if (cardBtn) {
-            const isFavNow = !isFav;
-            cardBtn.textContent = isFavNow ? '★ Favorito' : '☆ Favorito';
-            cardBtn.style.background = isFavNow ? '#ffd700' : '#ffe259';
+            cardBtn.textContent = isFavorite(poke.id) ? '★ Favorito' : '☆ Favorito';
+            cardBtn.style.background = isFavorite(poke.id) ? '#ffd700' : '#ffe259';
         }
     };
 }
@@ -449,12 +413,9 @@ window.addEventListener('DOMContentLoaded', () => {
     // Evento para quitar todos los favoritos
     document.getElementById('clearFavoritesBtn').onclick = () => {
         // Borrar todos los datos de los Pokémon favoritos
-        let favs = JSON.parse(localStorage.getItem('pokeapi:favorites') || '[]');
-        favs.forEach(f => {
-            localStorage.removeItem(`pokeapi:pokemon:${f.id}`);
-            localStorage.removeItem(`pokeapi:pokemon:${f.name}`);
-        });
-        localStorage.removeItem('pokeapi:favorites');
+        const favs = getFavorites();
+        favs.forEach(f => removeFavorite(f));
+        setFavorites([]);
         // Actualizar botones de favoritos en cards
         document.querySelectorAll('.fav-btn').forEach(btn => {
             btn.textContent = '☆ Favorito';
@@ -467,12 +428,38 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 });
 
+// Helpers para favoritos
+function getFavorites() {
+    try {
+        return JSON.parse(localStorage.getItem('pokeapi:favorites') || '[]');
+    } catch { return []; }
+}
+function setFavorites(favs) {
+    localStorage.setItem('pokeapi:favorites', JSON.stringify(favs));
+}
+function isFavorite(id) {
+    return getFavorites().some(f => f.id == id);
+}
+function addFavorite(poke) {
+    let favs = getFavorites();
+    if (favs.length >= 50) return false;
+    if (!isFavorite(poke.id)) {
+        favs.unshift({ id: poke.id, name: poke.name });
+        setFavorites(favs);
+        return true;
+    }
+    return false;
+}
+function removeFavorite(poke) {
+    let favs = getFavorites().filter(f => f.id != poke.id);
+    setFavorites(favs);
+    localStorage.removeItem(`pokeapi:pokemon:${poke.id}`);
+    localStorage.removeItem(`pokeapi:pokemon:${poke.name}`);
+}
+
 // Renderiza todos los Pokémon favoritos desde localStorage
 function renderFavoritePokemons() {
-    let favs = [];
-    try {
-        favs = JSON.parse(localStorage.getItem('pokeapi:favorites') || '[]');
-    } catch {}
+    const favs = getFavorites();
     if (!favs.length) {
         document.getElementById('pokemonInfo').innerHTML = '<p>No tienes favoritos aún.</p>';
         return;

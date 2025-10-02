@@ -311,6 +311,14 @@ function showPokemonModal(poke, container) {
     const closeBtn = modal.querySelector('#closeModal');
     closeBtn.onclick = () => { modal.remove(); };
     modal.onclick = (e) => { if (e.target.id === 'pokeModal') modal.remove(); };
+    // Cerrar modal con Escape
+    function escListener(e) {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', escListener);
+        }
+    }
+    document.addEventListener('keydown', escListener);
     // Evento favorito en modal
     const favBtn = modal.querySelector('#favModalBtn');
     favBtn.onclick = () => {

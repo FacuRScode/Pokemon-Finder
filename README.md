@@ -24,6 +24,9 @@ Una web interactiva para explorar Pokémon usando la PokéAPI.
 
 No requiere backend ni instalación de dependencias.
 
+**Demo online:**
+[GitHub Pages - Pokedex](https://facurscode.github.io/Pokemon-Finder/index.html)
+
 ## Estructura
 
 - `index.html`: Estructura principal y layout

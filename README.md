@@ -1,18 +1,47 @@
-# Pokémon Finder
+# Pokedex
+
+Una web interactiva para explorar Pokémon usando la PokéAPI.
 
 ## Características
 
-- **Lista de Pokémon:** La aplicación muestra una lista de al menos 10 Pokémon al cargar la página, con su imagen y nombre.
-- **Búsqueda de Pokémon:** Los usuarios pueden buscar Pokémon por nombre usando un campo de búsqueda.
-- **Detalles de Pokémon:** Al hacer clic en un Pokémon, se muestra un modal con información detallada como habilidades, altura y peso.
-- **Favoritos:** Los usuarios pueden marcar a sus Pokémon favoritos, y estos se guardarán en el `localStorage` para persistencia en el navegador.
-- **Paginación:** Los Pokémon se muestran en bloques de 10 para facilitar la navegación.
-- **Responsive Design:** La aplicación se adapta a diferentes tamaños de pantalla para una experiencia de usuario óptima en dispositivos móviles y de escritorio.
+- Búsqueda por nombre o número
+- Listado paginado de Pokémon (24 por página)
+- Fichas con detalles y color por tipo
+- Modal con información ampliada
+- Últimas búsquedas
+- Autocompletado en el buscador
+- Navegación entre páginas
+- Responsive y moderno
+- Gestión de favoritos (agregar, quitar, ver favoritos, límite de 50)
+- Botón para limpiar todos los favoritos
+- Filtrado en tiempo real desde el buscador
+- Dropdown de últimas búsquedas
 
-## Tecnologías Utilizadas
+## Instalación y uso
 
-- **HTML5**: Estructura del sitio web.
-- **CSS3**: Estilización y diseño visual.
-- **JavaScript**: Manipulación del DOM, interacciones con la API y funcionalidad de la aplicación.
-- **PokeAPI**: Fuente de datos de Pokémon.
-- **LocalStorage**: Para almacenar los Pokémon marcados como favoritos en el navegador del usuario.
+1. Clona este repositorio o descarga los archivos.
+2. Abre `index.html` en tu navegador.
+
+No requiere backend ni instalación de dependencias.
+
+## Estructura
+
+- `index.html`: Estructura principal y layout
+- `styles.css`: Estilos y colores por tipo
+- `app.js`: Lógica de búsqueda, renderizado, favoritos y paginación
+
+## Recursos
+
+- PokéAPI (documentación): [https://pokeapi.co/](https://pokeapi.co/)
+- Endpoint detalle: `https://pokeapi.co/api/v2/pokemon/{nombre|id}`
+- Endpoint listado: `https://pokeapi.co/api/v2/pokemon?offset=0&limit=20`
+- Sprites artwork oficial (por id): `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{id}.png`
+- Sprites oficiales: [https://github.com/PokeAPI/sprites](https://github.com/PokeAPI/sprites)
+
+## Autor
+
+FacuRScode
+
+---
+
+¡Disfruta explorando el mundo Pokémon!

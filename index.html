@@ -3,39 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon App</title>
+    <title>Pokedex</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Pokedex</h1>
-        <input type="text" id="search-input" id="search-input" placeholder="Buscar Pokémon..." oninput="searchPokemon()">
-        <button id="button-favorites" onclick="showFavorites()">Ver Favoritos</button>
+    <header class="header">
+    <h1><a href="index.html" style="color:inherit;text-decoration:none;cursor:pointer;">Pokedex</a></h1>
     </header>
-    
-    <section id="pokemon-list" class="pokemon-list">
-        <!-- Los Pokémon se cargarán aquí -->
-    </section>
-    
-    <div id="pagination-controls">
-        <button id="prev-button" onclick="changePage(-1)">Anterior</button>
-        <button id="next-button" onclick="changePage(1)">Siguiente</button>
-        <button id="index-button" onclick="changePage(0)" >Volver al inicio</button>
-    </div>
-
-    <!-- Modal para mostrar detalles del Pokémon -->
-    <div id="pokemon-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" onclick="closeModal()">×</span>
-            <h2 id="pokemon-name"></h2>
-            <img id="pokemon-image" alt="Pokemon Image">
-            <p><strong>Altura:</strong> <span id="pokemon-height"></span> m</p>
-            <p><strong>Peso:</strong> <span id="pokemon-weight"></span> kg</p>
-            <p><strong>Habilidades:</strong> <span id="pokemon-abilities"></span></p>
-            <button id="closeModal" onclick="closeModal()">Cerrar</button>
-        </div>
-    </div>
-
+    <main class="main-layout">
+        <aside class="sidebar left">
+            <!-- Opcional: filtros, menú, info extra -->
+        </aside>
+        <section class="content">
+            <div class="search-box">
+                <input type="text" id="pokemonInput" placeholder="Ingresa el nombre o número de un Pokémon">
+                <button id="searchBtn">Buscar</button>
+                <button id="showFavoritesBtn" style="background:#ffd700;color:#333;border:1px solid #333;border-radius:6px;cursor:pointer;font-size:1rem;padding:8px 18px;margin-left:8px;">Ver favoritos</button>
+            </div>
+            <div id="pokemonInfo"></div>
+            <div class="pagination-list">
+                <ul id="pokemonList"></ul>
+                <div class="pagination">
+                    <button id="prevPage">Anterior</button>
+                    <span id="pageInfo"></span>
+                    <button id="nextPage">Siguiente</button>
+                    <input type="number" id="pageSelector" min="1" value="1" style="width:60px;margin-left:12px;">
+                    <button id="goToPage">Ir</button>
+                </div>
+                <div style="text-align:center;margin-top:18px;">
+                    <button id="clearFavoritesBtn" style="background:#ffe259;color:#333;border:none;border-radius:6px;cursor:pointer;font-size:1rem;padding:8px 18px;">Quitar todos los favoritos</button>
+                </div>
+            </div>
+        </section>
+        <aside class="sidebar right">
+            <!-- Opcional: publicidad, ranking, info extra -->
+        </aside>
+    </main>
     <script src="app.js"></script>
 </body>
 </html>
